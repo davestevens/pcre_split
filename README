@@ -5,3 +5,9 @@ implementation of perl split() command in C using pcre
 
 perl split - http://perldoc.perl.org/functions/split.html
 pcre - http://www.pcre.org/
+
+compile with:
+
+gcc -Wall -Wextra -pedantic -lpcre src/main.c src/pcre_split.c -Iinc -o pcreSplitTest
+
+in src/main.c there is a main function which will run the split command with a couple of examples
