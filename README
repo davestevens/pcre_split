@@ -1,0 +1,7 @@
+pcreSplit
+dave stevens (@daveisanidiot)
+
+implementation of perl split() command in C using pcre
+
+perl split - http://perldoc.perl.org/functions/split.html
+pcre - http://www.pcre.org/
