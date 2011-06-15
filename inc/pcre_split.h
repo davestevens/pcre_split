@@ -13,12 +13,18 @@
 struct split_t {
   char *string;
   char *match;
-  char *back;
   struct split_t *next;
 };
+typedef struct split_t split_t;
 
-int pcre_split(char *, char *, struct split_t *);
-int pcre_split_int(pcre *, char *, struct split_t *);
+typedef struct {
+  char *string;
+  char *match;
+  char *back;
+} split_t_int;
+
+split_t *pcre_split(char *, char *);
+split_t_int *pcre_split_int(pcre *, char *);
 int pcre_split_free(struct split_t *);
 int pcre_split_print(struct split_t *);
 
