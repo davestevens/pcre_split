@@ -57,10 +57,12 @@ int pcre_split_int(pcre *re, char *string, struct split_t *split) {
 
   int rc;
   int ovector[OVECCOUNT];
-  int length = (int)strlen(string);
+  int length;
   char *front, *back, *match;
 
   /*printf("pcre_split_int; %s\n", string);*/
+  length = (int)strlen(string);
+
 
   rc = pcre_exec(
 		 re,
