@@ -87,13 +87,13 @@ split_t_int *pcre_split_int(pcre *re, char *string) {
     printf("Warning: ovector only has room for %d captured substrings\n", rc-1);
   }
 
-  s->string = malloc(sizeof(char) * (ovector[0] + 1));
+  s->string = calloc(sizeof(char) * (ovector[0] + 1), 1);
   strncpy(s->string, string, ovector[0]);
 
-  s->match = malloc(sizeof(char) * ((ovector[1] - ovector[0]) + 1));
+  s->match = calloc(sizeof(char) * ((ovector[1] - ovector[0]) + 1), 1);
   strncpy(s->match, (char *)(string + ovector[0]), (ovector[1] - ovector[0]));
 
-  s->back = malloc(sizeof(char) * ((length - ovector[1]) + 1));
+  s->back = calloc(sizeof(char) * ((length - ovector[1]) + 1), 1);
   strncpy(s->back, (char *)(string + ovector[1]), (length - ovector[1]));
 
   return (split_t_int *)s;
