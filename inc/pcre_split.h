@@ -11,16 +11,16 @@
 #define OVECCOUNT 30
 
 struct split_t {
-  char *string;
-  char *match;
-  struct split_t *next;
+	char *string;
+	char *match;
+	struct split_t *next;
 };
 typedef struct split_t split_t;
 
 typedef struct {
-  char *string;
-  char *match;
-  char *back;
+	char *string;
+	char *match;
+	char *back;
 } split_t_int;
 
 split_t *pcre_split(char *, char *);
