@@ -23,10 +23,9 @@ src/main.c contains a  main function which will run the split command with a cou
 
 ```C
 split_t *pcre_split(char *regex, char *string);
-
 ```
-Provided pointes Regular Expression and a string to search the pcre_split() function returns a pointer to a linked list of split_t structures. These structures contain pointers to a string, match and pointer to following matches. Where *string is the portion of the provided string before any found match, *match is the section of the provided string which matched the provided regular expression and next points to the following split_t structure containing the remained of the data.
-See the pcre_split_print() function for an example of accessing the split_t data.
+Provided pointers to a regex and a string to search the `pcre_split()` function returns a pointer to a linked list of `split_t` structures. These structures contain pointers to a string, match and pointer to following matches. Where `*string` is the portion of the provided string before any found match, `*match` is the section of the provided string which matched the provided regular expression and `*next` points to the following `split_t` structure containing the remained of the data.
+See the `pcre_split_print()` function for an example of accessing the split_t data.
 
 ```C
 int pcre_split_free(split_t *pcre_split);
