@@ -1,5 +1,5 @@
-#ifndef _GUARD_PCRE_SPLIT
-#define _GUARD_PCRE_SPLIT
+#ifndef __GUARD_PCRE_SPLIT_H
+#define __GUARD_PCRE_SPLIT_H
 
 /*
  */
@@ -10,22 +10,21 @@
 
 #define OVECCOUNT 30
 
-struct split_t {
+typedef struct split_t {
 	char *string;
 	char *match;
 	struct split_t *next;
-};
-typedef struct split_t split_t;
+} split_t;
 
-typedef struct {
+typedef struct split_t_internal {
 	char *string;
 	char *match;
-	char *back;
-} split_t_int;
+	unsigned int back_test;
+} split_t_internal;
 
 split_t *pcre_split(char *, char *);
-split_t_int *pcre_split_int(pcre *, char *);
-int pcre_split_free(struct split_t *);
-int pcre_split_print(struct split_t *);
+split_t_internal *pcre_split_internal(pcre *, char *);
+int pcre_split_free(split_t *);
+unsigned int pcre_split_print(split_t *);
 
 #endif
