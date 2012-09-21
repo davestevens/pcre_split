@@ -19,7 +19,7 @@ typedef struct split_t {
 typedef struct split_t_internal {
 	char *string;
 	char *match;
-	unsigned int back_test;
+	unsigned int length;
 } split_t_internal;
 
 split_t *pcre_split(char *, char *);
