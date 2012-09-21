@@ -1,5 +1,15 @@
 #include "pcre_split.h"
 
+#define OVECCOUNT 30
+
+typedef struct split_t_internal {
+	char *string;
+	char *match;
+	unsigned int length;
+} split_t_internal;
+
+split_t_internal *pcre_split_internal(pcre *, char *);
+
 /* Initialise the RegEx */
 split_t *pcre_split(char *pattern, char *string)
 {
