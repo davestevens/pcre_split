@@ -1,92 +1,101 @@
 #include "pcre_split.h"
 
-/* initialise the regex */
+/* Initialise the RegEx */
 split_t *pcre_split(char *pattern, char *string)
 {
 	pcre *re;
 	const char *error;
 	int erroffset;
-	split_t_int *ret_int;
-	split_t *curr;
+	split_t_internal *si;
+	split_t *curr = NULL;
 	split_t *head = NULL;
 
-	/* setup regex */
-	re = pcre_compile(
-		pattern,
-		0,
-		&error,
-		&erroffset,
-		NULL);
+	/*
+	  Make a local copy of pattern and string
+	*/
+	char *s = string;
 
-	/* check if compilation was successful */
+	/*
+	  Setup RegEx
+	*/
+	re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
+
+	/*
+	  Check if compilation was successful
+	*/
 	if(re == NULL) {
 		printf("Error: PCRE compilation failed at offset %d: %s\n", erroffset, error);
 		return (split_t *)NULL;
 	}
 
-
-	/* loop thorough string */
+	/*
+	  Loop thorough string
+	*/
 	do {
 		if(head == NULL) {
-			head = (split_t *)calloc(sizeof(split_t), 1);
-			curr = head;
+			curr = head = (split_t *)calloc(sizeof(split_t), 1);
 		}
 		else {
 			curr->next = (split_t *)calloc(sizeof(split_t), 1);
 			curr = curr->next;
 		}
-		ret_int = pcre_split_int(re, string);
-		curr->string = ret_int->string;
-		curr->match = ret_int->match;
-		string = ret_int->back;
-		free(ret_int);
+		if(!curr) {
+			fprintf(stderr, "Error allocating memory for split_t\n");
+			return NULL;
+		}
+
+		/* Return first occurence of match of RegEx */
+		si = pcre_split_internal(re, s);
+
+		/* Copy pointers of string and match */
+		curr->string = si->string;
+		curr->match = si->match;
+
+		/* Increment string pointer to skip previous match */
+		s += si->length;
+
+		free(si);
 	} while(curr->match);
 
+	/*
+	  Free locally allocated memory
+	 */
 	pcre_free(re);
-
 	return head;
 }
 
-split_t_int *pcre_split_int(pcre *re, char *string)
+split_t_internal *pcre_split_internal(pcre *re, char *string)
 {
 
 	int rc;
 	int ovector[OVECCOUNT];
 	int length;
-	split_t_int *s = (split_t_int *)calloc(sizeof(split_t_int), 1);
+	split_t_internal *s = (split_t_internal *)calloc(1, sizeof(split_t_internal));
 
 	length = (int)strlen(string);
 
-	rc = pcre_exec(
-		re,
-		NULL,
-		string,
-		length,
-		0,
-		0,
-		ovector,
-		OVECCOUNT);
+	rc = pcre_exec(re, NULL, string, length, 0, 0, ovector, OVECCOUNT);
 
 	/* check for matches */
 	if(rc < 0) {
 		switch(rc) {
 			case PCRE_ERROR_NOMATCH:
-				s->string = string;
+				s->string = (char *)calloc(strlen(string) + 1, sizeof(char));
+				strncpy(s->string, string, strlen(string));
 				s->match = NULL;
 				return s;
 				break;
 			default:
 				printf("Error: Matching error: %d\n", rc);
-				return (split_t_int *)NULL;
+				return (split_t_internal *)NULL;
 				break;
 		}
-		pcre_free(re);
 	}
 
 	/* check if output vector was large enough */
 	if(rc == 0) {
 		rc = OVECCOUNT/3;
-		printf("Warning: ovector only has room for %d captured substrings\n", rc-1);
+		fprintf(stderr, "Warning: ovector only has room for %d captured substrings\n", rc-1);
 	}
 
 	s->string = calloc(sizeof(char) * (ovector[0] + 1), 1);
@@ -95,41 +104,57 @@ split_t_int *pcre_split_int(pcre *re, char *string)
 	s->match = calloc(sizeof(char) * ((ovector[1] - ovector[0]) + 1), 1);
 	strncpy(s->match, (char *)(string + ovector[0]), (ovector[1] - ovector[0]));
 
-	s->back = calloc(sizeof(char) * ((length - ovector[1]) + 1), 1);
-	strncpy(s->back, (char *)(string + ovector[1]), (length - ovector[1]));
+	s->length = ovector[1];
 
-	return (split_t_int *)s;
+	return (split_t_internal *)s;
 }
 
 int pcre_split_free(split_t *split)
 {
-	split_t *mine;
-
-	while(split->next != NULL) {
-		mine = split;
-		split = split->next;
-
-		free(mine->string);
-		free(mine->match);
-		free(mine);
+	if(split == NULL) {
+		/* Nothing to free */
+		return -1;
 	}
+	else {
+		split_t *mine = NULL;
+		do {
+			mine = split;
 
-	free(split->string);
-	free(split);
+			if(mine->string) {
+				free(mine->string);
+			}
+			if(mine->match) {
+				free(mine->match);
+			}
+
+			split = split->next;
+			free(mine);
+		} while(split);
+		
+	}
 	return 0;
 }
 
-int pcre_split_print(split_t *split)
+unsigned int pcre_split_print(split_t *split)
 {
-
-	if(split == NULL)
+	if(split == NULL) {
 		printf("Error: Nothing to print\n");
-	else {
-		do {
-			printf("string: %s\n", split->string);
-			printf("match : %s\n", split->match);
-		} while((split = split->next) != NULL);
+		return 0;
 	}
+	else {
+		unsigned int count = 0;
+		do {
+			if(split->string) {
+				printf("string: %s\n", split->string);
+			}
+			if(split->match) {
+				printf("match : %s\n", split->match);
+			}
+			++count;
+			split = split->next;
+		} while(split);
 
+		return count;
+	}
 	return 0;
 }
